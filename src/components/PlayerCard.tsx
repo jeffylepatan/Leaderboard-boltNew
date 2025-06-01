@@ -37,10 +37,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
         };
       default:
         return {
-          cardClasses: `${baseCardClasses} bg-white hover:bg-gray-50 border border-gray-200`,
+          cardClasses: `${baseCardClasses} bg-white hover:bg-gray-50 border border-gray-200 text-gray-800`,
           icon: <Star className="w-5 h-5 mr-2 text-indigo-500 opacity-70" />,
           medal: "",
-          rankClasses: "font-medium text-lg text-gray-700"
+          rankClasses: "font-medium text-lg text-gray-800"
         };
     }
   };

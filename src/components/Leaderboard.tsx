@@ -52,21 +52,21 @@ const Leaderboard: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fadeIn">
+    <div className="w-full max-w-4xl mx-auto px-4 py-8 animate-fadeIn bg-gray-900">
       <header className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold text-indigo-900 mb-2 flex items-center justify-center">
-          <Trophy className="w-10 h-10 mr-3 text-yellow-500" />
-          ACRET Game Leaderboard
+        <h1 className="text-3xl md:text-5xl font-bold text-gray-100 mb-2 flex items-center justify-center">
+          <Trophy className="w-8 md:w-10 h-8 md:h-10 mr-2 md:mr-3 text-yellow-500" />
+          Acret Dev Leaderboard
         </h1>
-        <p className="text-lg text-indigo-700">Who will reach the top? The competition is fierce!</p>
+        <p className="text-sm md:text-lg text-gray-400">Who will reach the top? The competition is fierce!</p>
       </header>
 
       {state.players.length >= 3 && (
         <TopPlayers players={state.players} />
       )}
 
-      <div className="bg-indigo-50 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-indigo-900 border-b border-indigo-200 pb-2">
+      <div className="bg-gray-800 rounded-lg p-4 md:p-6 shadow-md">
+        <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-100 border-b border-gray-600 pb-2">
           Full Rankings
         </h2>
         <div className="space-y-2">
