@@ -1,0 +1,30 @@
+[
+  {
+    "alias": "DragonSlayer",
+    "totalPoints": 5
+  },
+  {
+    "alias": "StarGuardian",
+    "totalPoints": 5
+  },
+  {
+    "alias": "NightRider",
+    "totalPoints": 2
+  },
+  {
+    "alias": "SkyWalker",
+    "totalPoints": 3
+  },
+  {
+    "alias": "StormChaser",
+    "totalPoints": 5
+  },
+  {
+    "alias": "FirePhoenix",
+    "totalPoints": 5
+  },
+  {
+    "alias": "IceWizard",
+    "totalPoints": 5
+  }
+]
