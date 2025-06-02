@@ -5,13 +5,12 @@ import { Trophy, Medal, Star, Gamepad2 } from 'lucide-react';
 interface PlayerCardProps {
   player: Player;
   rank: number;
+  rankingType: 'points' | 'vacation' | 'sick';
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
-  // Basic styles for all cards
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) => {
   const baseCardClasses = "flex items-center justify-between w-full p-4 rounded-lg shadow-md mb-3 transform transition-all duration-300 hover:scale-102 hover:shadow-lg";
   
-  // Get appropriate styling based on rank
   const getRankStyling = () => {
     switch (rank) {
       case 1:
@@ -47,6 +46,27 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
 
   const { cardClasses, icon, medal, rankClasses } = getRankStyling();
 
+  const getValue = () => {
+    switch (rankingType) {
+      case 'vacation':
+        return player.vacationLeaveCredits || 0;
+      case 'sick':
+        return player.sickLeaveCredits || 0;
+      default:
+        return player.totalPoints;
+    }
+  };
+
+  const getUnit = () => {
+    switch (rankingType) {
+      case 'vacation':
+      case 'sick':
+        return 'days';
+      default:
+        return 'pts';
+    }
+  };
+
   return (
     <div className={cardClasses}>
       <div className="flex items-center">
@@ -79,8 +99,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
         </div>
       </div>
       <div className="flex items-center">
-        <div className="text-2xl font-bold">{player.totalPoints.toLocaleString()}</div>
-        <span className="ml-1 text-sm font-medium">pts</span>
+        <div className="text-2xl font-bold">{getValue().toLocaleString()}</div>
+        <span className="ml-1 text-sm font-medium">{getUnit()}</span>
       </div>
     </div>
   );

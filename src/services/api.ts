@@ -28,7 +28,9 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
           totalPoints: parseInt(player.field_points, 10),
           avatar: player.user_picture ? `https://dev.acret2025.fun${player.user_picture}` : undefined,
           level: player.field_level ? parseInt(player.field_level, 10) : undefined,
-          playerName: player.field_player_name || undefined
+          playerName: player.field_player_name || undefined,
+          vacationLeaveCredits: player.field_vacation_leave_credits ? parseInt(player.field_vacation_leave_credits, 10) : 0,
+          sickLeaveCredits: player.field_sick_leave_credits ? parseInt(player.field_sick_leave_credits, 10) : 0
         }))
       : [];
     
@@ -36,7 +38,7 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
       console.warn('No valid player data received from API');
     }
     
-    return validPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
+    return validPlayers;
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     throw error;
@@ -53,10 +55,8 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
 
     const data = await response.json();
 
-    // Transform the data to match the PointHistory interface, with robust checks
     return Array.isArray(data) ? data.map((item: any) => {
       const title = item?.title ?? 'Untitled';
-      // Extract datetime attribute from HTML string
       let date = 'Invalid Date';
       const createdHtml = item?.created;
       if (typeof createdHtml === 'string') {
@@ -69,7 +69,7 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
       const pointsRaw = item?.field_deduction_points;
       let points = 0;
       if (pointsRaw !== undefined && !isNaN(Number(pointsRaw))) {
-        points = -parseInt(pointsRaw, 10); // Negative since these are deductions
+        points = -parseInt(pointsRaw, 10);
       }
       return {
         title,

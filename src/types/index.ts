@@ -4,12 +4,15 @@ export interface Player {
   avatar?: string;
   level?: number;
   playerName?: string;
+  vacationLeaveCredits?: number;
+  sickLeaveCredits?: number;
 }
 
 export interface LeaderboardState {
   players: Player[];
   loading: boolean;
   error: string | null;
+  rankingType: 'points' | 'vacation' | 'sick';
 }
 
 export interface PointHistory {

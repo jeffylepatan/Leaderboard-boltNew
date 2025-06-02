@@ -4,12 +4,34 @@ import { Trophy, Medal, Gamepad2 } from 'lucide-react';
 
 interface TopPlayersProps {
   players: Player[];
+  rankingType: 'points' | 'vacation' | 'sick';
 }
 
-const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
+const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
   if (players.length < 3) return null;
   
   const topThree = players.slice(0, 3);
+
+  const getValue = (player: Player) => {
+    switch (rankingType) {
+      case 'vacation':
+        return player.vacationLeaveCredits || 0;
+      case 'sick':
+        return player.sickLeaveCredits || 0;
+      default:
+        return player.totalPoints;
+    }
+  };
+
+  const getUnit = () => {
+    switch (rankingType) {
+      case 'vacation':
+      case 'sick':
+        return 'days';
+      default:
+        return 'points';
+    }
+  };
   
   return (
     <div className="w-full mb-8">
@@ -36,8 +58,8 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
             {topThree[1].level && (
               <div className="text-sm text-gray-400 mb-2">Level {topThree[1].level}</div>
             )}
-            <div className="text-2xl md:text-3xl font-bold text-gray-300">{topThree[1].totalPoints.toLocaleString()}</div>
-            <div className="text-xs md:text-sm font-medium text-gray-400">points</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-300">{getValue(topThree[1]).toLocaleString()}</div>
+            <div className="text-xs md:text-sm font-medium text-gray-400">{getUnit()}</div>
           </div>
         </div>
 
@@ -62,8 +84,8 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
             {topThree[0].level && (
               <div className="text-sm text-yellow-400 mb-2">Level {topThree[0].level}</div>
             )}
-            <div className="text-3xl md:text-4xl font-bold text-yellow-300">{topThree[0].totalPoints.toLocaleString()}</div>
-            <div className="text-sm md:text-sm font-medium text-yellow-400">points</div>
+            <div className="text-3xl md:text-4xl font-bold text-yellow-300">{getValue(topThree[0]).toLocaleString()}</div>
+            <div className="text-sm md:text-sm font-medium text-yellow-400">{getUnit()}</div>
           </div>
         </div>
 
@@ -88,8 +110,8 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
             {topThree[2].level && (
               <div className="text-sm text-amber-400 mb-2">Level {topThree[2].level}</div>
             )}
-            <div className="text-2xl md:text-3xl font-bold text-amber-300">{topThree[2].totalPoints.toLocaleString()}</div>
-            <div className="text-xs md:text-sm font-medium text-amber-400">points</div>
+            <div className="text-2xl md:text-3xl font-bold text-amber-300">{getValue(topThree[2]).toLocaleString()}</div>
+            <div className="text-xs md:text-sm font-medium text-amber-400">{getUnit()}</div>
           </div>
         </div>
       </div>
