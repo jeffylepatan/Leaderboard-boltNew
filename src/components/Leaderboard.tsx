@@ -53,7 +53,7 @@ const Leaderboard: React.FC = () => {
             ? 'sick' 
             : 'points'
       }));
-    }, 30000);
+    }, 10000); // Changed from 30000 to 10000
 
     return () => clearInterval(interval);
   }, []);

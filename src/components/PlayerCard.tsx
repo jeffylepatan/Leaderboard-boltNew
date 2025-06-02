@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Player } from '../types';
 import { Trophy, Medal, Star, Gamepad2 } from 'lucide-react';
 
@@ -9,7 +9,13 @@ interface PlayerCardProps {
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) => {
-  const baseCardClasses = "flex items-center justify-between w-full p-4 rounded-lg shadow-md mb-3 transform transition-all duration-300 hover:scale-102 hover:shadow-lg";
+  const [animationDelay, setAnimationDelay] = useState(0); // Added state for animation delay
+
+  useEffect(() => {
+    setAnimationDelay(rank * 0.1); // Set delay based on rank
+  }, [rank]);
+
+  const baseCardClasses = `flex items-center justify-between w-full p-4 rounded-lg shadow-md mb-3 transform transition-all duration-300 hover:scale-102 hover:shadow-lg animate-fadeInLeft`;
   
   const getRankStyling = () => {
     switch (rank) {
@@ -68,7 +74,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
   };
 
   return (
-    <div className={cardClasses}>
+    <div className={cardClasses} style={{ animationDelay: `${animationDelay}s` }}> {/* Added animation delay */}
       <div className="flex items-center">
         <div className="flex items-center justify-center w-10 h-10 rounded-full mr-3">
           {icon}

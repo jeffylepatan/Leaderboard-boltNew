@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Player } from '../types';
 import { Trophy, Medal, Gamepad2 } from 'lucide-react';
 
@@ -8,6 +8,12 @@ interface TopPlayersProps {
 }
 
 const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
+  const [animationKey, setAnimationKey] = useState(0); // Added state for animation key
+
+  useEffect(() => {
+    setAnimationKey(prevKey => prevKey + 1); // Increment animation key on rankingType change
+  }, [rankingType]);
+
   if (players.length < 3) return null;
   
   const topThree = players.slice(0, 3);
@@ -34,7 +40,7 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
   };
   
   return (
-    <div className="w-full mb-8">
+    <div key={animationKey} className="w-full mb-8 animate-fadeInBottom"> {/* Added animation class */}
       <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-gray-100">Top Champions</h2>
       <div className="flex flex-col md:flex-row justify-center items-center md:items-end gap-2 md:gap-4">
         {/* 2nd Place */}
