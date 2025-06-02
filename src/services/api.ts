@@ -54,7 +54,7 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
     return data.map((item: any) => ({
       title: item.title[0].value,
       date: new Date(item.created[0].value).toLocaleDateString(),
-      points: parseInt(item.field_deduction_points[0].value, 10)
+      points: -parseInt(item.field_deduction_points[0].value, 10) // Negative since these are deductions
     }));
   } catch (error) {
     console.error('Error fetching point history:', error);
