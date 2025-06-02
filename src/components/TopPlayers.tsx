@@ -11,13 +11,12 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
   
   const topThree = players.slice(0, 3);
   
-  // Center the 1st place, put 2nd on left, 3rd on right
   return (
     <div className="w-full mb-8">
       <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-gray-100">Top Champions</h2>
       <div className="flex flex-col md:flex-row justify-center items-center md:items-end gap-2 md:gap-4">
         {/* 2nd Place */}
-        <div className="order-2 md:order-1 flex-1 md:flex-initial transform scale-90 md:scale-100">
+        <div className="order-2 md:order-1 flex-1 md:flex-initial transform scale-90 md:scale-100 animate-champion-card animate-champion-card-delay-1">
           <div className="bg-gradient-to-b from-gray-700 to-gray-800 rounded-t-lg p-3 md:p-4 pt-4 md:pt-6 pb-8 md:pb-12 shadow-lg text-center transform hover:scale-105 transition-transform duration-300 border-b-4 border-gray-600">
             {topThree[1].avatar ? (
               <img 
@@ -43,7 +42,7 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
         </div>
 
         {/* 1st Place */}
-        <div className="order-1 md:order-2 flex-1 md:flex-initial md:mx-2 md:mx-4 transform scale-100 md:scale-110 z-10">
+        <div className="order-1 md:order-2 flex-1 md:flex-initial md:mx-2 md:mx-4 transform scale-100 md:scale-110 z-10 animate-champion-card">
           <div className="bg-gradient-to-b from-yellow-600 to-yellow-700 rounded-t-lg p-4 md:p-6 pt-6 md:pt-8 pb-12 md:pb-16 shadow-xl text-center transform hover:scale-105 transition-transform duration-300 border-b-4 border-yellow-800">
             {topThree[0].avatar ? (
               <img 
@@ -69,7 +68,7 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players }) => {
         </div>
 
         {/* 3rd Place */}
-        <div className="order-3 flex-1 md:flex-initial transform scale-90 md:scale-100">
+        <div className="order-3 flex-1 md:flex-initial transform scale-90 md:scale-100 animate-champion-card animate-champion-card-delay-2">
           <div className="bg-gradient-to-b from-amber-800 to-amber-900 rounded-t-lg p-3 md:p-4 pt-4 md:pt-6 pb-8 md:pb-12 shadow-lg text-center transform hover:scale-105 transition-transform duration-300 border-b-4 border-amber-900">
             {topThree[2].avatar ? (
               <img 
