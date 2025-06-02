@@ -1,31 +1,19 @@
 import { Player, PointHistory } from '../types';
-import mockData from '../data/mockData.json';
 
 function isValidPlayer(player: unknown): player is Player {
   if (!player || typeof player !== 'object') return false;
   
   return (
-    'alias' in player &&
-    typeof (player as Player).alias === 'string' &&
-    'totalPoints' in player &&
-    typeof (player as Player).totalPoints === 'number'
+    'name' in player &&
+    typeof (player as any).name === 'string' &&
+    'field_points' in player &&
+    typeof (player as any).field_points === 'string'
   );
 }
 
 export async function fetchLeaderboardData(): Promise<Player[]> {
   try {
-    // Use mock data for development
-    const validPlayers = (mockData as unknown[]).filter(isValidPlayer);
-    
-    if (validPlayers.length === 0) {
-      console.warn('No valid player data received');
-    }
-    
-    return validPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
-    
-    // Uncomment the following code when ready to use the real API
-    /*
-    const response = await fetch('/api/pointsystem/deductions');
+    const response = await fetch('https://dev.acret2025.fun/api/player/exp');
     
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.status}`);
@@ -33,17 +21,19 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
     
     const data = await response.json();
     
-    // Validate and filter the data to ensure only valid Player objects are returned
+    // Transform the data to match our Player interface
     const validPlayers = Array.isArray(data) 
-      ? data.filter(isValidPlayer)
+      ? data.map(player => ({
+          alias: player.name,
+          totalPoints: parseInt(player.field_points, 10)
+        }))
       : [];
     
     if (validPlayers.length === 0) {
       console.warn('No valid player data received from API');
     }
     
-    return validPlayers;
-    */
+    return validPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     throw error;
@@ -62,9 +52,9 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
 
     // Transform the data to match the PointHistory interface
     return data.map((item: any) => ({
-      title: item.title,
-      date: item.created.match(/datetime="(.*?)"/)?.[1].split('T')[0] || 'Invalid Date',
-      points: parseInt(item.field_deduction_points, 10),
+      title: item.title[0].value,
+      date: new Date(item.created[0].value).toLocaleDateString(),
+      points: parseInt(item.field_deduction_points[0].value, 10)
     }));
   } catch (error) {
     console.error('Error fetching point history:', error);
