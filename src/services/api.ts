@@ -25,7 +25,10 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
     const validPlayers = Array.isArray(data) 
       ? data.map(player => ({
           alias: player.name,
-          totalPoints: parseInt(player.field_points, 10)
+          totalPoints: parseInt(player.field_points, 10),
+          avatar: player.user_picture ? `https://dev.acret2025.fun${player.user_picture}` : undefined,
+          level: player.field_level ? parseInt(player.field_level, 10) : undefined,
+          playerName: player.field_player_name || undefined
         }))
       : [];
     

@@ -1,6 +1,9 @@
 export interface Player {
   alias: string;
   totalPoints: number;
+  avatar?: string;
+  level?: number;
+  playerName?: string;
 }
 
 export interface LeaderboardState {

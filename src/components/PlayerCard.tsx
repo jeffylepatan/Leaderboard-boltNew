@@ -1,6 +1,6 @@
 import React from 'react';
 import { Player } from '../types';
-import { Trophy, Medal, Star } from 'lucide-react';
+import { Trophy, Medal, Star, Gamepad2 } from 'lucide-react';
 
 interface PlayerCardProps {
   player: Player;
@@ -53,11 +53,27 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
         <div className="flex items-center justify-center w-10 h-10 rounded-full mr-3">
           {icon}
         </div>
-        <div>
-          <div className={rankClasses}>
-            {medal} Rank #{rank}
+        <div className="flex items-center">
+          {player.avatar ? (
+            <img 
+              src={player.avatar} 
+              alt={player.playerName || player.alias} 
+              className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-md"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4 border-2 border-white shadow-md">
+              <Gamepad2 className="w-6 h-6 text-gray-400" />
+            </div>
+          )}
+          <div>
+            <div className={rankClasses}>
+              {medal} Rank #{rank}
+            </div>
+            <div className="font-semibold text-lg">{player.playerName || player.alias}</div>
+            {player.level && (
+              <div className="text-sm opacity-75">Level {player.level}</div>
+            )}
           </div>
-          <div className="font-semibold text-lg">{player.alias}</div>
         </div>
       </div>
       <div className="flex items-center">
