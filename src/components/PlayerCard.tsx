@@ -69,7 +69,9 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank }) => {
             <div className={rankClasses}>
               {medal} Rank #{rank}
             </div>
-            <div className="font-semibold text-lg">{player.playerName || player.alias}</div>
+            <div className="font-semibold text-lg">
+              {player.playerName} <span className="text-sm opacity-75">({player.alias})</span>
+            </div>
             {player.level && (
               <div className="text-sm opacity-75">Level {player.level}</div>
             )}
