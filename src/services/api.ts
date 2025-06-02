@@ -50,12 +50,30 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
 
     const data = await response.json();
 
-    // Transform the data to match the PointHistory interface
-    return data.map((item: any) => ({
-      title: item.title[0].value,
-      date: new Date(item.created[0].value).toLocaleDateString(),
-      points: -parseInt(item.field_deduction_points[0].value, 10) // Negative since these are deductions
-    }));
+    // Transform the data to match the PointHistory interface, with robust checks
+    return Array.isArray(data) ? data.map((item: any) => {
+      const title = item?.title ?? 'Untitled';
+      // Extract datetime attribute from HTML string
+      let date = 'Invalid Date';
+      const createdHtml = item?.created;
+      if (typeof createdHtml === 'string') {
+        const match = createdHtml.match(/datetime=\"([^\"]+)\"/);
+        if (match && match[1]) {
+          const d = new Date(match[1]);
+          date = isNaN(d.getTime()) ? 'Invalid Date' : d.toLocaleDateString();
+        }
+      }
+      const pointsRaw = item?.field_deduction_points;
+      let points = 0;
+      if (pointsRaw !== undefined && !isNaN(Number(pointsRaw))) {
+        points = -parseInt(pointsRaw, 10); // Negative since these are deductions
+      }
+      return {
+        title,
+        date,
+        points
+      };
+    }) : [];
   } catch (error) {
     console.error('Error fetching point history:', error);
     throw error;
