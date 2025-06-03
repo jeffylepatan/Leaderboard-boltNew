@@ -41,7 +41,7 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
   
   return (
     <div key={animationKey} className="w-full mb-8 animate-fadeInBottom">
-      <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-gray-100 neon-text">Top Champions</h2>
+      <h2 className="text-xl md:text-2xl font-bold text-center mb-4 md:mb-6 text-gray-100">Top Champions</h2>
       <div className="flex flex-col md:flex-row justify-center items-center md:items-end gap-2 md:gap-4">
         {/* 2nd Place */}
         <div className="order-2 md:order-1 flex-1 md:flex-initial transform scale-90 md:scale-100 animate-champion-card animate-champion-card-delay-1">
@@ -57,14 +57,14 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
                 <Gamepad2 className="w-8 h-8 text-gray-300" />
               </div>
             )}
-            <div className="text-lg md:text-2xl font-bold mb-1 text-gray-300 neon-text">🥈 2nd Place</div>
+            <div className="text-lg md:text-2xl font-bold mb-1 text-gray-300">🥈 2nd Place</div>
             <div className="text-base md:text-xl font-semibold mb-2 md:mb-3 text-gray-300">
               {topThree[1].playerName || topThree[1].alias}
             </div>
             {topThree[1].level && (
               <div className="text-sm text-gray-400 mb-2">Level {topThree[1].level}</div>
             )}
-            <div className="text-2xl md:text-3xl font-bold text-gray-300 neon-text">{getValue(topThree[1]).toLocaleString()}</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-300">{getValue(topThree[1]).toLocaleString()}</div>
             <div className="text-xs md:text-sm font-medium text-gray-400">{getUnit()}</div>
           </div>
         </div>
@@ -83,14 +83,14 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
                 <Trophy className="w-10 h-10 text-yellow-300" />
               </div>
             )}
-            <div className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300 neon-text">🥇 1st Place</div>
+            <div className="text-2xl md:text-3xl font-bold mb-1 text-yellow-300">🥇 1st Place</div>
             <div className="text-xl md:text-2xl font-semibold mb-3 md:mb-4 text-yellow-300">
               {topThree[0].playerName || topThree[0].alias}
             </div>
             {topThree[0].level && (
               <div className="text-sm text-yellow-400 mb-2">Level {topThree[0].level}</div>
             )}
-            <div className="text-3xl md:text-4xl font-bold text-yellow-300 neon-text">{getValue(topThree[0]).toLocaleString()}</div>
+            <div className="text-3xl md:text-4xl font-bold text-yellow-300">{getValue(topThree[0]).toLocaleString()}</div>
             <div className="text-sm md:text-sm font-medium text-yellow-400">{getUnit()}</div>
           </div>
         </div>
@@ -109,14 +109,14 @@ const TopPlayers: React.FC<TopPlayersProps> = ({ players, rankingType }) => {
                 <Medal className="w-8 h-8 text-amber-300" />
               </div>
             )}
-            <div className="text-lg md:text-2xl font-bold mb-1 text-amber-300 neon-text">🥉 3rd Place</div>
+            <div className="text-lg md:text-2xl font-bold mb-1 text-amber-300">🥉 3rd Place</div>
             <div className="text-base md:text-xl font-semibold mb-2 md:mb-3 text-amber-300">
               {topThree[2].playerName || topThree[2].alias}
             </div>
             {topThree[2].level && (
               <div className="text-sm text-amber-400 mb-2">Level {topThree[2].level}</div>
             )}
-            <div className="text-2xl md:text-3xl font-bold text-amber-300 neon-text">{getValue(topThree[2]).toLocaleString()}</div>
+            <div className="text-2xl md:text-3xl font-bold text-amber-300">{getValue(topThree[2]).toLocaleString()}</div>
             <div className="text-xs md:text-sm font-medium text-amber-400">{getUnit()}</div>
           </div>
         </div>

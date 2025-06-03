@@ -24,21 +24,21 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-amber-300 to-yellow-500 text-yellow-900`,
           icon: <Trophy className="w-6 h-6 mr-2 text-yellow-900" />,
           medal: "🥇",
-          rankClasses: "font-bold text-2xl text-yellow-900 neon-text"
+          rankClasses: "font-bold text-2xl text-yellow-900"
         };
       case 2:
         return {
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800`,
           icon: <Medal className="w-6 h-6 mr-2 text-gray-800" />,
           medal: "🥈",
-          rankClasses: "font-bold text-xl text-gray-800 neon-text"
+          rankClasses: "font-bold text-xl text-gray-800"
         };
       case 3:
         return {
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100`,
           icon: <Medal className="w-6 h-6 mr-2 text-amber-100" />,
           medal: "🥉",
-          rankClasses: "font-bold text-xl text-amber-100 neon-text"
+          rankClasses: "font-bold text-xl text-amber-100"
         };
       default:
         return {
@@ -105,11 +105,9 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
         </div>
       </div>
       <div className="flex items-center">
-        <div className="text-2xl font-bold neon-text">{getValue().toLocaleString()}</div>
+        <div className="text-2xl font-bold">{getValue().toLocaleString()}</div>
         <span className="ml-1 text-sm font-medium">{getUnit()}</span>
       </div>
     </div>
   );
-};
-
-export default PlayerCard;
+}
