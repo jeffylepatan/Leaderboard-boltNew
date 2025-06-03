@@ -111,3 +111,5 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
     </div>
   );
 }
+
+export default PlayerCard
