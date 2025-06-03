@@ -16,44 +16,62 @@ const Leaderboard: React.FC = () => {
     rankingType: 'points'
   });
   const [history, setHistory] = useState<PointHistory[]>([]);
+  const [cycleCount, setCycleCount] = useState(0);
 
   const fetchData = async () => {
-    setState({ ...state, loading: true, error: null });
+    setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const [playerData, historyData] = await Promise.all([
         fetchLeaderboardData(),
         fetchPointHistory()
       ]);
       
-      setState({
+      setState(prev => ({
         players: playerData,
         loading: false,
         error: null,
-        rankingType: state.rankingType
-      });
+        rankingType: prev.rankingType
+      }));
       setHistory(historyData);
     } catch (error) {
-      setState({
+      setState(prev => ({
         players: [],
         loading: false,
         error: 'Failed to load leaderboard data. Please try again.',
-        rankingType: state.rankingType
-      });
+        rankingType: prev.rankingType
+      }));
     }
   };
 
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => {
-      setState(prevState => ({
-        ...prevState,
-        rankingType: prevState.rankingType === 'points' 
+      setState(prevState => {
+        const newRankingType = prevState.rankingType === 'points' 
           ? 'vacation' 
           : prevState.rankingType === 'vacation' 
             ? 'sick' 
-            : 'points'
-      }));
-    }, 10000); // Changed from 30000 to 10000
+            : 'points';
+        
+        // If switching back to points, increment cycle count
+        if (newRankingType === 'points') {
+          setCycleCount(prev => {
+            const newCount = prev + 1;
+            // After 3 cycles, reset count and fetch new data
+            if (newCount >= 3) {
+              setCycleCount(0);
+              fetchData();
+            }
+            return newCount;
+          });
+        }
+        
+        return {
+          ...prevState,
+          rankingType: newRankingType
+        };
+      });
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
