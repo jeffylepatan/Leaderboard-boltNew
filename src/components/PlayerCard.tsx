@@ -9,13 +9,13 @@ interface PlayerCardProps {
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) => {
-  const [animationDelay, setAnimationDelay] = useState(0); // Added state for animation delay
+  const [animationDelay, setAnimationDelay] = useState(0);
 
   useEffect(() => {
-    setAnimationDelay(rank * 0.1); // Set delay based on rank
+    setAnimationDelay(rank * 0.1);
   }, [rank]);
 
-  const baseCardClasses = `flex items-center justify-between w-full p-4 rounded-lg shadow-md mb-3 transform transition-all duration-300 hover:scale-102 hover:shadow-lg animate-fadeInLeft`;
+  const baseCardClasses = `flex items-center justify-between w-full p-4 rounded-lg shadow-md mb-3 transform transition-all duration-300 hover:scale-102 hover:shadow-lg animate-fadeInLeft neon-glow`;
   
   const getRankStyling = () => {
     switch (rank) {
@@ -24,21 +24,21 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-amber-300 to-yellow-500 text-yellow-900`,
           icon: <Trophy className="w-6 h-6 mr-2 text-yellow-900" />,
           medal: "🥇",
-          rankClasses: "font-bold text-2xl text-yellow-900"
+          rankClasses: "font-bold text-2xl text-yellow-900 neon-text"
         };
       case 2:
         return {
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800`,
           icon: <Medal className="w-6 h-6 mr-2 text-gray-800" />,
           medal: "🥈",
-          rankClasses: "font-bold text-xl text-gray-800"
+          rankClasses: "font-bold text-xl text-gray-800 neon-text"
         };
       case 3:
         return {
           cardClasses: `${baseCardClasses} bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100`,
           icon: <Medal className="w-6 h-6 mr-2 text-amber-100" />,
           medal: "🥉",
-          rankClasses: "font-bold text-xl text-amber-100"
+          rankClasses: "font-bold text-xl text-amber-100 neon-text"
         };
       default:
         return {
@@ -74,7 +74,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
   };
 
   return (
-    <div className={cardClasses} style={{ animationDelay: `${animationDelay}s` }}> {/* Added animation delay */}
+    <div className={cardClasses} style={{ animationDelay: `${animationDelay}s` }}>
       <div className="flex items-center">
         <div className="flex items-center justify-center w-10 h-10 rounded-full mr-3">
           {icon}
@@ -84,10 +84,10 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
             <img 
               src={player.avatar} 
               alt={player.playerName || player.alias} 
-              className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-md"
+              className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-md neon-border"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4 border-2 border-white shadow-md">
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4 border-2 border-white shadow-md neon-border">
               <Gamepad2 className="w-6 h-6 text-gray-400" />
             </div>
           )}
@@ -105,7 +105,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player, rank, rankingType }) =>
         </div>
       </div>
       <div className="flex items-center">
-        <div className="text-2xl font-bold">{getValue().toLocaleString()}</div>
+        <div className="text-2xl font-bold neon-text">{getValue().toLocaleString()}</div>
         <span className="ml-1 text-sm font-medium">{getUnit()}</span>
       </div>
     </div>
