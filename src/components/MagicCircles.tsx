@@ -38,10 +38,8 @@ const MagicCircles: React.FC = () => {
     };
 
     const addCircle = () => {
-      setCircles(prev => {
-        const newCircle = createCircle();
-        return [...prev, newCircle];
-      });
+      const newCircle = createCircle(); // Moved outside setState to be in scope for setTimeout
+      setCircles(prev => [...prev, newCircle]);
 
       setTimeout(() => {
         setCircles(prev => prev.filter(circle => circle.id !== newCircle.id));
