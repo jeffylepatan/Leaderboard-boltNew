@@ -9,7 +9,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
   return (
-    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+    <GoogleOAuthProvider clientId="969654797704-n5v2hp7b36ugonl9carbhq09rqppg1g0.apps.googleusercontent.com">
       <div className="min-h-screen bg-black from-indigo-100 to-purple-100 flex flex-col items-center justify-start py-8 relative">
         <MagicCircles />
         <Fireflies />
