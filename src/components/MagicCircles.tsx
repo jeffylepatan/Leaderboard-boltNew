@@ -14,18 +14,18 @@ const MagicCircles: React.FC = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
 
   const colors = [
-    'rgba(147, 51, 234, 0.3)', // purple
-    'rgba(59, 130, 246, 0.3)', // blue
-    'rgba(236, 72, 153, 0.3)', // pink
-    'rgba(34, 197, 94, 0.3)',  // green
-    'rgba(249, 115, 22, 0.3)', // orange
+    'rgba(147, 51, 234, 0.4)', // purple
+    'rgba(59, 130, 246, 0.4)', // blue
+    'rgba(236, 72, 153, 0.4)', // pink
+    'rgba(34, 197, 94, 0.4)',  // green
+    'rgba(249, 115, 22, 0.4)', // orange
   ];
 
   useEffect(() => {
     const createCircle = () => {
       const x = Math.random() * window.innerWidth;
       const y = Math.random() * window.innerHeight;
-      const size = 100 + Math.random() * 200;
+      const size = 150 + Math.random() * 250; // Increased size
       const color = colors[Math.floor(Math.random() * colors.length)];
       const rotation = Math.random() * 360;
       const designType = Math.floor(Math.random() * 3);
@@ -50,12 +50,13 @@ const MagicCircles: React.FC = () => {
       }, 3000);
     };
 
-    const interval = setInterval(addCircle, 3000);
+    const interval = setInterval(addCircle, 4000); // Increased interval
+    addCircle(); // Initial circle
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
       {circles.map(circle => (
         <div
           key={circle.id}
@@ -67,7 +68,7 @@ const MagicCircles: React.FC = () => {
             height: `${circle.size}px`,
           }}
         >
-          {/* Main circle */}
+          {/* Outer circle with magical symbols */}
           <div
             className="absolute inset-0 rounded-full"
             style={{
@@ -76,21 +77,30 @@ const MagicCircles: React.FC = () => {
             }}
           />
           
-          {/* Inner design elements */}
+          {/* Secondary circle */}
           <div
-            className="absolute inset-[15%] rounded-full"
+            className="absolute inset-[10%] rounded-full"
             style={{
               border: `1px solid ${circle.color}`,
-              transform: `rotate(${-circle.rotation}deg)`,
+              transform: `rotate(${-circle.rotation * 0.5}deg)`,
             }}
           />
           
-          {/* Magical runes and symbols */}
+          {/* Inner circle with runes */}
+          <div
+            className="absolute inset-[20%] rounded-full"
+            style={{
+              border: `1px dashed ${circle.color}`,
+              transform: `rotate(${circle.rotation * 0.8}deg)`,
+            }}
+          />
+          
+          {/* Magical inscriptions */}
           <div
             className="absolute inset-[30%] rounded-full"
             style={{
-              border: `1px dashed ${circle.color}`,
-              transform: `rotate(${circle.rotation * 2}deg)`,
+              border: `1px dotted ${circle.color}`,
+              transform: `rotate(${-circle.rotation * 1.2}deg)`,
             }}
           />
           
@@ -107,7 +117,7 @@ const MagicCircles: React.FC = () => {
           ))}
           
           {/* Decorative dots */}
-          {Array.from({ length: 8 }).map((_, idx) => (
+          {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={idx}
               className="absolute w-2 h-2 rounded-full"
@@ -116,13 +126,48 @@ const MagicCircles: React.FC = () => {
                 left: '50%',
                 top: '50%',
                 transform: `
-                  rotate(${(idx * 45) + circle.rotation}deg)
+                  rotate(${(idx * 30) + circle.rotation}deg)
                   translateY(-${circle.size / 2}px)
                   translate(-50%, -50%)
                 `,
               }}
             />
           ))}
+          
+          {/* Additional magical elements based on designType */}
+          {circle.designType === 0 && (
+            <div
+              className="absolute inset-[40%] rounded-full"
+              style={{
+                border: `1px solid ${circle.color}`,
+                transform: `rotate(${circle.rotation * 1.5}deg)`,
+              }}
+            />
+          )}
+          
+          {circle.designType === 1 && (
+            Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={`triangle-${idx}`}
+                className="absolute left-1/2 top-1/2 w-1 h-[40%] origin-bottom"
+                style={{
+                  background: circle.color,
+                  transform: `rotate(${(idx * 60) + circle.rotation}deg)`,
+                }}
+              />
+            ))
+          )}
+          
+          {circle.designType === 2 && (
+            <div
+              className="absolute inset-[25%] rounded-none"
+              style={{
+                border: `1px solid ${circle.color}`,
+                transform: `rotate(${circle.rotation * 0.7}deg)`,
+                clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+              }}
+            />
+          )}
         </div>
       ))}
     </div>
