@@ -1,4 +1,6 @@
 import { Player, PointHistory } from '../types';
+import { db } from './firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 function isValidPlayer(player: unknown): player is Player {
   if (!player || typeof player !== 'object') return false;
@@ -13,6 +15,28 @@ function isValidPlayer(player: unknown): player is Player {
 
 export async function fetchLeaderboardData(): Promise<Player[]> {
   try {
+    // Try to fetch from Firebase first
+    const playersRef = collection(db, 'players');
+    const q = query(playersRef, orderBy('totalPoints', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const firebasePlayers: Player[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      firebasePlayers.push({
+        alias: data.alias,
+        totalPoints: data.totalPoints,
+        avatar: data.avatar,
+        level: data.level,
+        playerName: data.playerName,
+        vacationLeaveCredits: data.vacationLeaveCredits,
+        sickLeaveCredits: data.sickLeaveCredits,
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
+    });
+    if (firebasePlayers.length > 0) return firebasePlayers;
+    
+    // fallback to API if Firebase is empty
     const response = await fetch('https://dev.acret2025.fun/api/player/exp');
     
     if (!response.ok) {
@@ -40,6 +64,7 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
     
     return validPlayers;
   } catch (error) {
+    // fallback to API if Firebase fails
     console.error('Error fetching leaderboard data:', error);
     throw error;
   }
@@ -47,6 +72,22 @@ export async function fetchLeaderboardData(): Promise<Player[]> {
 
 export async function fetchPointHistory(): Promise<PointHistory[]> {
   try {
+    // Try to fetch from Firebase first
+    const historyRef = collection(db, 'pointHistory');
+    const q = query(historyRef, orderBy('date', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const firebaseHistory: PointHistory[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      firebaseHistory.push({
+        title: data.title,
+        date: data.date,
+        points: data.points
+      });
+    });
+    if (firebaseHistory.length > 0) return firebaseHistory;
+    
+    // fallback to API if Firebase is empty
     const response = await fetch('https://dev.acret2025.fun/api/pointsystem/deductions');
 
     if (!response.ok) {
@@ -78,6 +119,7 @@ export async function fetchPointHistory(): Promise<PointHistory[]> {
       };
     }) : [];
   } catch (error) {
+    // fallback to API if Firebase fails
     console.error('Error fetching point history:', error);
     throw error;
   }

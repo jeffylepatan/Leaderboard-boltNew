@@ -6,6 +6,8 @@ export interface Player {
   playerName?: string;
   vacationLeaveCredits?: number;
   sickLeaveCredits?: number;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface LeaderboardState {
