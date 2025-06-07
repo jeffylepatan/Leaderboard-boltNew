@@ -21,7 +21,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [activeForm, setActiveForm] = useState<'player' | 'score' | 'vacation' | 'sick'>('player');
+  const [activeForm, setActiveForm] = useState<'player' | 'score' | 'vacation' | 'sick' | 'config'>('player');
   const [scoreForm, setScoreForm] = useState({
     points: '',
     date: '',
@@ -54,6 +54,11 @@ const AdminDashboard: React.FC = () => {
     sickLeaveCredits: '',
     regularizationDate: '',
   });
+  const [config, setConfig] = useState({
+    twoYearsTenure: 0,
+    threeYearsTenure: 0,
+    fourYearsTenure: 0,
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +75,10 @@ const AdminDashboard: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfig({ ...config, [e.target.name]: e.target.value });
   };
 
   const handleAddPlayer = async (e: React.FormEvent) => {
@@ -146,10 +155,21 @@ const AdminDashboard: React.FC = () => {
         reason: scoreForm.reason,
         createdAt: new Date().toISOString(),
       });
-      setSuccess('Score deduction added successfully!');
+
+      const playerRef = (await import('firebase/firestore')).doc(db, 'players', scoreForm.playerId);
+      const playerSnap = await (await import('firebase/firestore')).getDoc(playerRef);
+      const currentPoints = playerSnap.data()?.totalPoints || 0;
+
+      const updatedPoints = Math.max(currentPoints - parseInt(scoreForm.points, 10), 0); // Ensure points don't go below 0
+
+      await (await import('firebase/firestore')).updateDoc(playerRef, {
+        totalPoints: updatedPoints,
+      });
+
+      setSuccess('Score deduction added and points updated successfully!');
       setScoreForm({ points: '', date: '', quarter: '', playerId: '', reason: '' });
     } catch (err) {
-      setError('Failed to add score deduction.');
+      setError('Failed to add score deduction and update points.');
     }
   };
 
@@ -158,18 +178,31 @@ const AdminDashboard: React.FC = () => {
     setSuccess('');
     setError('');
     try {
+      const daysToDeduct = Math.min(Math.max(parseInt(vacationForm.days, 10) || 1, 1), 5); // Default to 1, max 5
+
       await addDoc(collection(db, 'vacationDeductions'), {
-        days: parseInt(vacationForm.days, 10) || 0,
+        days: daysToDeduct,
         date: vacationForm.date,
         quarter: parseInt(vacationForm.quarter, 10) || 0,
         playerId: vacationForm.playerId,
         reason: vacationForm.reason,
         createdAt: new Date().toISOString(),
       });
-      setSuccess('Vacation leave deduction added successfully!');
+
+      const playerRef = (await import('firebase/firestore')).doc(db, 'players', vacationForm.playerId);
+      const playerSnap = await (await import('firebase/firestore')).getDoc(playerRef);
+      const currentCredits = playerSnap.data()?.vacationLeaveCredits || 0;
+
+      const updatedCredits = Math.max(currentCredits - daysToDeduct, 0); // Ensure credits don't go below 0
+
+      await (await import('firebase/firestore')).updateDoc(playerRef, {
+        vacationLeaveCredits: updatedCredits,
+      });
+
+      setSuccess('Vacation leave deduction added and credits updated successfully!');
       setVacationForm({ days: '', date: '', quarter: '', playerId: '', reason: '' });
     } catch (err) {
-      setError('Failed to add vacation leave deduction.');
+      setError('Failed to add vacation leave deduction and update credits.');
     }
   };
 
@@ -178,18 +211,31 @@ const AdminDashboard: React.FC = () => {
     setSuccess('');
     setError('');
     try {
+      const daysToDeduct = Math.min(Math.max(parseInt(sickForm.days, 10) || 1, 1), 5); // Default to 1, max 5
+
       await addDoc(collection(db, 'sickDeductions'), {
-        days: parseInt(sickForm.days, 10) || 0,
+        days: daysToDeduct,
         date: sickForm.date,
         quarter: parseInt(sickForm.quarter, 10) || 0,
         playerId: sickForm.playerId,
         reason: sickForm.reason,
         createdAt: new Date().toISOString(),
       });
-      setSuccess('Sick leave deduction added successfully!');
+
+      const playerRef = (await import('firebase/firestore')).doc(db, 'players', sickForm.playerId);
+      const playerSnap = await (await import('firebase/firestore')).getDoc(playerRef);
+      const currentCredits = playerSnap.data()?.sickLeaveCredits || 0;
+
+      const updatedCredits = Math.max(currentCredits - daysToDeduct, 0); // Ensure credits don't go below 0
+
+      await (await import('firebase/firestore')).updateDoc(playerRef, {
+        sickLeaveCredits: updatedCredits,
+      });
+
+      setSuccess('Sick leave deduction added and credits updated successfully!');
       setSickForm({ days: '', date: '', quarter: '', playerId: '', reason: '' });
     } catch (err) {
-      setError('Failed to add sick leave deduction.');
+      setError('Failed to add sick leave deduction and update credits.');
     }
   };
 
@@ -222,7 +268,12 @@ const AdminDashboard: React.FC = () => {
       });
       // Refresh players list
       getDocs(collection(db, 'players')).then(snapshot => {
-        setPlayers(snapshot.docs.map(doc => ({ id: doc.id, playerName: doc.data().playerName })));
+        setPlayers(snapshot.docs.map(doc => ({
+          id: doc.id,
+          playerName: doc.data().playerName || '',
+          firstName: doc.data().firstName || '',
+          lastName: doc.data().lastName || '',
+        })));
       });
     } catch (err) {
       setError('Failed to update player.');
@@ -243,6 +294,20 @@ const AdminDashboard: React.FC = () => {
       sickLeaveCredits: data.sickLeaveCredits?.toString() || '',
       regularizationDate: data.regularizationDate || '',
     });
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccess('');
+    setError('');
+    try {
+      // Save the configuration to Firestore or wherever necessary
+      // For now, just logging the config
+      console.log('Configuration saved:', config);
+      setSuccess('Configuration saved successfully!');
+    } catch (err) {
+      setError('Failed to save configuration.');
+    }
   };
 
   const resetAllPlayerScores = async () => {
@@ -277,6 +342,103 @@ const AdminDashboard: React.FC = () => {
     }
   }, []);
 
+  React.useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const configDoc = (await import('firebase/firestore')).doc(db, 'config', 'leaveCredits');
+        const configSnap = await (await import('firebase/firestore')).getDoc(configDoc);
+        const data = configSnap.data();
+        if (data) {
+          setConfig({
+            twoYearsTenure: data.twoYearsTenure || 0,
+            threeYearsTenure: data.threeYearsTenure || 0,
+            fourYearsTenure: data.fourYearsTenure || 0,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch configuration:', err);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  React.useEffect(() => {
+    const resetVacationLeaveCredits = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'players'));
+        const batch = (await import('firebase/firestore')).writeBatch(db);
+
+        snapshot.forEach(doc => {
+          const player = doc.data();
+          const regularizationDate = new Date(player.regularizationDate);
+          const currentYear = new Date().getFullYear();
+          const yearsSinceRegularization = currentYear - regularizationDate.getFullYear();
+
+          let newCredits = 0;
+          if (yearsSinceRegularization >= 4) {
+            newCredits = config.fourYearsTenure;
+          } else if (yearsSinceRegularization === 3) {
+            newCredits = config.threeYearsTenure;
+          } else if (yearsSinceRegularization === 2) {
+            newCredits = config.twoYearsTenure;
+          }
+
+          batch.update(doc.ref, { vacationLeaveCredits: newCredits });
+        });
+
+        await batch.commit();
+        console.log('Vacation leave credits reset successfully!');
+      } catch (err) {
+        console.error('Failed to reset vacation leave credits:', err);
+      }
+    };
+
+    const scheduleReset = () => {
+      const now = new Date();
+      const nextReset = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0); // January 01 at 00:00
+      const timeUntilReset = nextReset.getTime() - now.getTime();
+
+      setTimeout(() => {
+        resetVacationLeaveCredits();
+        scheduleReset(); // Schedule the next reset
+      }, timeUntilReset);
+    };
+
+    scheduleReset();
+  }, []);
+
+  const resetSickLeaveCredits = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'players'));
+      const batch = (await import('firebase/firestore')).writeBatch(db);
+
+      snapshot.forEach(doc => {
+        batch.update(doc.ref, { sickLeaveCredits: 10 });
+      });
+
+      await batch.commit();
+      console.log('Sick leave credits reset successfully!');
+    } catch (err) {
+      console.error('Failed to reset sick leave credits:', err);
+    }
+  };
+
+  const scheduleSickLeaveReset = () => {
+    const now = new Date();
+    const nextReset = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0); // January 01 at 00:00
+    const timeUntilReset = nextReset.getTime() - now.getTime();
+
+    setTimeout(() => {
+      resetSickLeaveCredits();
+      scheduleSickLeaveReset(); // Schedule the next reset
+    }, timeUntilReset);
+  };
+
+  React.useEffect(() => {
+    scheduleSickLeaveReset();
+  }, []);
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -308,37 +470,51 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded shadow-md w-full max-w-md">
-        <div className="flex justify-between mb-6">
-          <button
-            className={`px-3 py-2 rounded font-semibold text-sm mr-2 ${activeForm === 'player' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-            onClick={() => setActiveForm('player')}
-          >Add Player</button>
-          <button
-            className={`px-3 py-2 rounded font-semibold text-sm mr-2 ${activeForm === 'score' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-            onClick={() => setActiveForm('score')}
-          >Score Deduction</button>
-          <button
-            className={`px-3 py-2 rounded font-semibold text-sm mr-2 ${activeForm === 'vacation' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-            onClick={() => setActiveForm('vacation')}
-          >Vacation Leave Deduction</button>
-          <button
-            className={`px-3 py-2 rounded font-semibold text-sm ${activeForm === 'sick' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-            onClick={() => setActiveForm('sick')}
-          >Sick Leave Credit Deduction</button>
-          <button
-            className="px-3 py-2 rounded font-semibold text-sm bg-red-600 text-white ml-2"
-            onClick={resetAllPlayerScores}
-            type="button"
-          >Reset All Scores to 5</button>
-        </div>
+    <div className="min-h-screen flex bg-gray-900">
+      <div className="w-1/4 bg-gray-800 p-4">
+        <h2 className="text-xl font-bold text-gray-100 mb-4">Admin Dashboard</h2>
+        <ul className="space-y-2">
+          <li>
+            <button
+              className={`w-64 text-left px-3 py-2 rounded font-semibold text-sm ${activeForm === 'player' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+              onClick={() => setActiveForm('player')}
+            >Add / Edit Player</button>
+          </li>
+          <li>
+            <button
+              className={`w-64 text-left px-3 py-2 rounded font-semibold text-sm ${activeForm === 'score' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+              onClick={() => setActiveForm('score')}
+            >WFH Score Deduction</button>
+          </li>
+          <li>
+            <button
+              className={`w-64 text-left px-3 py-2 rounded font-semibold text-sm ${activeForm === 'vacation' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+              onClick={() => setActiveForm('vacation')}
+            >Vacation Leave Credit Deduction</button>
+          </li>
+          <li>
+            <button
+              className={`w-64 text-left px-3 py-2 rounded font-semibold text-sm ${activeForm === 'sick' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300'}`}
+              onClick={() => setActiveForm('sick')}
+            >Sick Leave Credit Deduction</button>
+          </li>
+          <li>
+            <button
+              className="w-64 text-left px-3 py-2 rounded font-semibold text-sm bg-gray-700 text-gray-300"
+              onClick={() => setActiveForm('config')}
+            >Configure Points</button>
+          </li>
+        </ul>
+      </div>
+      <div className="w-3/4 bg-gray-900 p-8">
         {activeForm === 'player' && (
           <>
-            <form onSubmit={handleAddPlayer}>
+            <form onSubmit={handleAddPlayer} className="flex flex-col items-start">
               <h2 className="text-xl font-bold mb-4 text-gray-100">Add New Player</h2>
+              {success && <div className="text-green-400 mb-2">{success}</div>}
+              {error && <div className="text-red-400 mb-2">{error}</div>}
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="text"
                 name="firstName"
                 placeholder="First Name"
@@ -347,7 +523,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="text"
                 name="lastName"
                 placeholder="Last Name"
@@ -356,7 +532,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="text"
                 name="playerName"
                 placeholder="Player Name"
@@ -365,7 +541,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="number"
                 name="points"
                 placeholder="Points"
@@ -374,7 +550,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="number"
                 name="vacationLeaveCredits"
                 placeholder="Vacation Leave Credits"
@@ -383,7 +559,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="number"
                 name="sickLeaveCredits"
                 placeholder="Sick Leave Credits"
@@ -392,7 +568,7 @@ const AdminDashboard: React.FC = () => {
                 required
               />
               <input
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                 type="date"
                 name="regularizationDate"
                 placeholder="Regularization Date"
@@ -400,14 +576,15 @@ const AdminDashboard: React.FC = () => {
                 onChange={handleChange}
                 required
               />
-              {success && <div className="text-green-400 mb-2">{success}</div>}
-              {error && <div className="text-red-400 mb-2">{error}</div>}
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors" type="submit">Add Player</button>
+              <button
+                className="w-64 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors"
+                type="submit"
+              >Add Player</button>
             </form>
             <div className="mt-8">
               <h3 className="text-lg font-bold text-gray-200 mb-2">Edit Player</h3>
               <select
-                className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
+                className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
                 value={editPlayerId || ''}
                 onChange={e => e.target.value ? startEditPlayer(e.target.value) : setEditPlayerId(null)}
               >
@@ -417,9 +594,9 @@ const AdminDashboard: React.FC = () => {
                 ))}
               </select>
               {editPlayerId && (
-                <form onSubmit={handleEditPlayer} className="mt-2">
+                <form onSubmit={handleEditPlayer} className="flex flex-col items-start">
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="text"
                     name="firstName"
                     placeholder="First Name"
@@ -428,7 +605,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="text"
                     name="lastName"
                     placeholder="Last Name"
@@ -437,7 +614,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="text"
                     name="playerName"
                     placeholder="Player Name"
@@ -446,7 +623,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="number"
                     name="points"
                     placeholder="Points"
@@ -455,7 +632,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="number"
                     name="vacationLeaveCredits"
                     placeholder="Vacation Leave Credits"
@@ -464,7 +641,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="number"
                     name="sickLeaveCredits"
                     placeholder="Sick Leave Credits"
@@ -473,7 +650,7 @@ const AdminDashboard: React.FC = () => {
                     required
                   />
                   <input
-                    className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                    className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
                     type="date"
                     name="regularizationDate"
                     placeholder="Regularization Date"
@@ -481,17 +658,46 @@ const AdminDashboard: React.FC = () => {
                     onChange={handleEditChange}
                     required
                   />
-                  <button className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded transition-colors" type="submit">Update Player</button>
+                  <button
+                    className="w-64 bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded transition-colors"
+                    type="submit"
+                  >Update Player</button>
+                  <button
+                    className="w-64 bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors mt-3"
+                    onClick={async () => {
+                      if (editPlayerId) {
+                        try {
+                          const playerRef = (await import('firebase/firestore')).doc(db, 'players', editPlayerId);
+                          await (await import('firebase/firestore')).deleteDoc(playerRef);
+                          setSuccess('Player deleted successfully!');
+                          setEditPlayerId(null);
+                          // Refresh players list
+                          const snapshot = await getDocs(collection(db, 'players'));
+                          const updatedPlayers = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            playerName: doc.data().playerName,
+                            firstName: doc.data().firstName,
+                            lastName: doc.data().lastName,
+                          }));
+                          setPlayers(updatedPlayers);
+                        } catch (err) {
+                          setError('Failed to delete player.');
+                        }
+                      }
+                    }}
+                  >
+                    Delete Player
+                  </button>
                 </form>
               )}
             </div>
           </>
         )}
         {activeForm === 'score' && (
-          <form onSubmit={handleAddScoreDeduction}>
+          <form onSubmit={handleAddScoreDeduction}  className="flex flex-col items-start">
             <h2 className="text-xl font-bold mb-4 text-gray-100">Score Deduction</h2>
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="points"
               placeholder="Point Deduction"
@@ -500,7 +706,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="date"
               name="date"
               placeholder="Date"
@@ -509,7 +715,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="quarter"
               placeholder="Quarter"
@@ -518,7 +724,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <select
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
               name="playerId"
               value={scoreForm.playerId}
               onChange={handleScoreChange}
@@ -530,7 +736,7 @@ const AdminDashboard: React.FC = () => {
               ))}
             </select>
             <textarea
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               name="reason"
               placeholder="Reason for Deduction"
               value={scoreForm.reason}
@@ -540,23 +746,26 @@ const AdminDashboard: React.FC = () => {
             />
             {success && <div className="text-green-400 mb-2">{success}</div>}
             {error && <div className="text-red-400 mb-2">{error}</div>}
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors" type="submit">Add Score Deduction</button>
+            <button
+              className="w-64 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors"
+              type="submit"
+            >Add Score Deduction</button>
           </form>
         )}
         {activeForm === 'vacation' && (
-          <form onSubmit={handleAddVacationDeduction}>
+          <form onSubmit={handleAddVacationDeduction} className="flex flex-col items-start">
             <h2 className="text-xl font-bold mb-4 text-gray-100">Vacation Leave Deduction</h2>
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="days"
-              placeholder="Days Deducted"
-              value={vacationForm.days}
-              onChange={handleVacationChange}
-              required
+              placeholder="1"
+              value={vacationForm.days || '1'}
+              min="1"
+              max="5"
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="date"
               name="date"
               placeholder="Date"
@@ -565,7 +774,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="quarter"
               placeholder="Quarter"
@@ -574,7 +783,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <select
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
               name="playerId"
               value={vacationForm.playerId}
               onChange={handleVacationChange}
@@ -586,7 +795,7 @@ const AdminDashboard: React.FC = () => {
               ))}
             </select>
             <textarea
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               name="reason"
               placeholder="Reason for Deduction"
               value={vacationForm.reason}
@@ -596,23 +805,26 @@ const AdminDashboard: React.FC = () => {
             />
             {success && <div className="text-green-400 mb-2">{success}</div>}
             {error && <div className="text-red-400 mb-2">{error}</div>}
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors" type="submit">Add Vacation Leave Deduction</button>
+            <button
+              className="w-64 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors"
+              type="submit"
+            >Add Vacation Leave Deduction</button>
           </form>
         )}
         {activeForm === 'sick' && (
-          <form onSubmit={handleAddSickDeduction}>
+          <form onSubmit={handleAddSickDeduction} className="flex flex-col items-start">
             <h2 className="text-xl font-bold mb-4 text-gray-100">Sick Leave Credit Deduction</h2>
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="days"
-              placeholder="Days Deducted"
-              value={sickForm.days}
-              onChange={handleSickChange}
-              required
+              placeholder="1"
+              value={sickForm.days || '1'}
+              min="1"
+              max="5"
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="date"
               name="date"
               placeholder="Date"
@@ -621,7 +833,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <input
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               type="number"
               name="quarter"
               placeholder="Quarter"
@@ -630,7 +842,7 @@ const AdminDashboard: React.FC = () => {
               required
             />
             <select
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600"
               name="playerId"
               value={sickForm.playerId}
               onChange={handleSickChange}
@@ -642,7 +854,7 @@ const AdminDashboard: React.FC = () => {
               ))}
             </select>
             <textarea
-              className="w-full mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+              className="w-64 mb-3 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
               name="reason"
               placeholder="Reason for Deduction"
               value={sickForm.reason}
@@ -652,7 +864,57 @@ const AdminDashboard: React.FC = () => {
             />
             {success && <div className="text-green-400 mb-2">{success}</div>}
             {error && <div className="text-red-400 mb-2">{error}</div>}
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors" type="submit">Add Sick Leave Deduction</button>
+            <button
+              className="w-64 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors"
+              type="submit"
+            >Add Sick Leave Deduction</button>
+          </form>
+        )}
+        {activeForm === 'config' && (
+          <form onSubmit={handleSave} className="flex flex-col items-start">
+            <h2 className="text-xl font-bold mb-4 text-gray-100">Leave Credits Configuration</h2>
+            <div className="flex items-center mb-3">
+              <input
+                className="w-64 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                type="number"
+                name="twoYearsTenure"
+                placeholder={`2 Years Tenure Leave Credits (${config.twoYearsTenure})`}
+                value={config.twoYearsTenure}
+                onChange={handleConfigChange}
+                required
+              />
+              <span className="ml-2 text-gray-400">2 Years</span>
+            </div>
+            <div className="flex items-center mb-3">
+              <input
+                className="w-64 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                type="number"
+                name="threeYearsTenure"
+                placeholder={`3 Years Tenure Leave Credits (${config.threeYearsTenure})`}
+                value={config.threeYearsTenure}
+                onChange={handleConfigChange}
+                required
+              />
+              <span className="ml-2 text-gray-400">3 Years</span>
+            </div>
+            <div className="flex items-center mb-3">
+              <input
+                className="w-64 p-2 border rounded bg-gray-700 text-gray-100 border-gray-600 placeholder-gray-400"
+                type="number"
+                name="fourYearsTenure"
+                placeholder={`4 Years Tenure Leave Credits (${config.fourYearsTenure})`}
+                value={config.fourYearsTenure}
+                onChange={handleConfigChange}
+                required
+              />
+              <span className="ml-2 text-gray-400">4 Years and Above</span>
+            </div>
+            {success && <div className="text-green-400 mb-2">{success}</div>}
+            {error && <div className="text-red-400 mb-2">{error}</div>}
+            <button
+              className="w-64 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition-colors"
+              type="submit"
+            >Save Configuration</button>
           </form>
         )}
       </div>

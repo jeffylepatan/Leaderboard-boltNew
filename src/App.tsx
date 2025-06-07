@@ -5,6 +5,7 @@ import Fireflies from './components/Fireflies';
 import MagicCircles from './components/MagicCircles';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
+import AdminConfig from './components/AdminConfig';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <div className="relative z-10 w-full">
             <Routes>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/config" element={<AdminConfig />} />
               <Route path="/" element={isAuthenticated ? <Leaderboard /> : <Login onLogin={() => setIsAuthenticated(true)} />} />
             </Routes>
           </div>
